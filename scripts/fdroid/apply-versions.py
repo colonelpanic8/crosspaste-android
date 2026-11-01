@@ -6,11 +6,10 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from androguard.core.apk import APK
 from loguru import logger
 
 logger.remove()
-
-from androguard.core.apk import APK
 
 
 def read_versions(repo_dir: Path, app_id: str) -> list[tuple[int, str]]:
