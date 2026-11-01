@@ -1,0 +1,17 @@
+.direnv/
+.worktrees/
+.envrc.local
+.envrc.override
+build/
+dist/
+target/
+inputs/
+__pycache__/
+.ruff_cache/
+*.jks
+*.keystore
+*.p12
+*.apk
+*.apks
+*.zip
+

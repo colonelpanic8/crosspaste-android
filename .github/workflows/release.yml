@@ -1,0 +1,63 @@
+name: Release
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: Existing vMAJOR.MINOR.PATCH tag
+        required: true
+        type: string
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ inputs.tag_name || github.ref }}
+      - uses: cachix/install-nix-action@v31
+      - name: Restore signing identity
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          RELEASE_TAG: ${{ inputs.tag_name || github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import base64, os, pathlib, re
+          for name in ['ANDROID_KEYSTORE_BASE64', 'ANDROID_KEYSTORE_PASSWORD', 'ANDROID_KEY_ALIAS', 'ANDROID_KEY_PASSWORD']:
+              if not os.environ.get(name):
+                  raise SystemExit(f'Missing release signing secret: {name}')
+          tag = os.environ['RELEASE_TAG']
+          if not re.fullmatch(r'v\d+\.\d+\.\d+', tag):
+              raise SystemExit('Release tag must be vMAJOR.MINOR.PATCH')
+          path = pathlib.Path(os.environ['RUNNER_TEMP']) / 'crosspaste-release.jks'
+          path.write_bytes(base64.b64decode(os.environ['ANDROID_KEYSTORE_BASE64'], validate=True))
+          path.chmod(0o600)
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write(f'ANDROID_KEYSTORE_FILE={path}\nRELEASE_VERSION={tag[1:]}\n')
+          PY
+      - name: Check inputs and tooling
+        run: |
+          nix develop --command python3 scripts/build.py --fetch-inputs --check-inputs
+          nix develop --command just check
+      - name: Build signed standalone APK
+        run: nix develop --command just release "$RELEASE_VERSION"
+      - uses: softprops/action-gh-release@v3.0.3
+        with:
+          tag_name: v${{ env.RELEASE_VERSION }}
+          name: CrossPaste Community v${{ env.RELEASE_VERSION }}
+          files: |
+            dist/crosspaste-community.apk
+            dist/SHA256SUMS
+            dist/signing-certificate.txt
+            dist/build-report.json
+          generate_release_notes: true
+      - name: Remove temporary signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/crosspaste-release.jks"

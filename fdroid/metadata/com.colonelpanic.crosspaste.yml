@@ -1,0 +1,19 @@
+Categories:
+  - Connectivity
+License: Unknown
+AuthorName: Ivan Malison
+SourceCode: https://github.com/colonelpanic8/crosspaste-android
+IssueTracker: https://github.com/colonelpanic8/crosspaste-android/issues
+AntiFeatures:
+  - NonFreeComp
+  - NonFreeNet
+  - Tracking
+
+AutoName: CrossPaste Community
+Summary: Cross-device clipboard without local premium feature limits
+Description: |-
+  A separately packaged modification of CrossPaste Android 2.2.2. Sync text,
+  images and files across paired devices without device-count or sync-rate
+  premium limits. Includes the original Android integrations and bundled SDKs.
+  The linked source repository contains patch tooling, not the complete mobile
+  application source. This is an unofficial binary repository.

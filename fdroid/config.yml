@@ -1,0 +1,13 @@
+repo_url: https://colonelpanic8.github.io/crosspaste-android/fdroid/repo
+repo_name: CrossPaste Community
+repo_icon: icon.png
+repo_description: >-
+  Community-modified CrossPaste Android binary releases with local premium gates
+  removed. APKs are copied unchanged from GitHub releases. This is not the
+  official CrossPaste application or the official F-Droid catalog.
+archive_older: 0
+keystore: keystore.jks
+repo_keyalias: {env: FDROID_KEY_ALIAS}
+keystorepass: {env: FDROID_KEYSTORE_PASSWORD}
+keypass: {env: FDROID_KEY_PASSWORD}
+make_current_version_link: false

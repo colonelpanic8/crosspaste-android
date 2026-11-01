@@ -1,0 +1,32 @@
+{
+  "package": "com.crosspaste.android",
+  "versionName": "2.2.2",
+  "versionCode": 140200,
+  "minSdk": 32,
+  "targetSdk": 36,
+  "origin": "Installed Google Play app on user phone; adb pm path and adb pull",
+  "apks": [
+    {
+      "file": "base.apk",
+      "sha256": "48dc7175fe8b8945651182661d522d557bc3ffe9a99064eab9078caadff5d9d7",
+      "bytes": 68886426
+    },
+    {
+      "file": "split_config.en.apk",
+      "sha256": "bcbb24cb2e3d53aa13dce905d97b6b2b26f3cad3c04fc79061d615f08d31d29d",
+      "bytes": 78034
+    },
+    {
+      "file": "split_config.es.apk",
+      "sha256": "151029be2a59039d8e4c39a497e276c7732f2846793a8c3d5b629381337aace4",
+      "bytes": 45266
+    },
+    {
+      "file": "split_config.xxhdpi.apk",
+      "sha256": "e8e5d83059242c459ebe2c91563a8a934980b67cedc4cc89fafe554432497f22",
+      "bytes": 81904
+    }
+  ],
+  "sourceRelease": "upstream-2.2.2",
+  "sourceAsset": "crosspaste-2.2.2-inputs.zip"
+}

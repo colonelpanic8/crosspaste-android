@@ -1,0 +1,1 @@
+A separately packaged modification of CrossPaste Android 2.2.2. Sync text, images and files across paired devices without device-count or sync-rate premium limits. Includes the original Android integrations. This is a community binary patch, not a fully open-source mobile application or an official CrossPaste release.

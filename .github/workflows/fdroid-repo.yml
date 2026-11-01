@@ -1,0 +1,47 @@
+name: Publish F-Droid Repository
+on:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: cachix/install-nix-action@v31
+      - name: Build signed repository index
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FDROID_OUT_DIR: target/fdroid
+          FDROID_RELEASE_COUNT: "4"
+          FDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          FDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          FDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          FDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: nix develop --command just fdroid-repo
+      - name: Assemble Pages site
+        run: |
+          mkdir -p site/fdroid
+          cp -r target/fdroid/repo site/fdroid/repo
+          nix develop --command python3 scripts/fdroid/landing-page.py target/fdroid site/index.html
+          cat target/fdroid/fingerprint.txt
+      - uses: actions/upload-pages-artifact@v5.0.0
+        with:
+          path: site
+      - uses: actions/deploy-pages@v5.0.1
+        id: deploy
