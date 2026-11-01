@@ -1,0 +1,2 @@
+* Trust the declarative device fleet published in the dotfiles repository without PIN pairing.
+* Refresh the fleet list every 15 minutes and keep fleet peer keys and addresses seeded.

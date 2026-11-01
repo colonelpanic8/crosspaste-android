@@ -25,6 +25,24 @@ provider authorities are renamed, the Play startup licensing wrapper is replaced
 by the original application class, and release versions are derived from semver.
 Pairing, encryption, and transport authentication are left intact.
 
+## Fleet trust
+
+A small helper (`helper/`, compiled with `javac` and `d8` into an extra dex)
+starts from the application's `onCreate`. It reads the public fleet list from
+[`nix-shared/crosspaste-fleet.json`](https://github.com/colonelpanic8/dotfiles/blob/master/nix-shared/crosspaste-fleet.json)
+and seeds the same trust rows PIN pairing would create: each peer's public key
+in `CryptPublicKey` and a `SyncRuntimeInfoEntity` row with its addresses. It
+skips the member whose `appInstanceId` equals this device's app-scoped
+`ANDROID_ID`, and does nothing if no member matches. Existing rows keep their
+state; only missing fleet addresses are added. Rows outside the fleet are never
+removed.
+
+The list is applied from the cache in `files/crosspaste-fleet.json`, or the copy
+bundled at build time, before the app opens its database. A background thread
+fetches the URL every 15 minutes and re-applies the cache every minute. Writes
+use the app's bundled requery SQLite. Logs use the `CrossPasteFleet` tag. The
+build validates the list and accepts `--fleet PATH_OR_HTTPS_URL`.
+
 ## Build
 
 The toolchain follows the Nix flake + direnv + just layout. `flake.lock` pins

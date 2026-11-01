@@ -18,6 +18,7 @@ lint:
 check: fmt-check lint
     python3 scripts/fdroid/changelogs.py --check
     python3 scripts/build.py --check-inputs
+    python3 scripts/build.py --check-helper
 
 build version="1.0.0":
     python3 scripts/build.py --version {{version}}
