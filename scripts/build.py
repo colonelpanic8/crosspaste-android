@@ -66,9 +66,7 @@ def replace_method(path: Path, signature: str, body: str):
     pattern = rf"(?ms)^\.method {re.escape(signature)}\n.*?^\.end method$"
     matches = list(re.finditer(pattern, text))
     if len(matches) != 1:
-        raise ValueError(
-            f"Expected exactly one {signature} in {path}, got {len(matches)}"
-        )
+        raise ValueError(f"Expected exactly one {signature} in {path}, got {len(matches)}")
     method = f".method {signature}\n    .locals 1\n\n{body}\n.end method"
     path.write_text(re.sub(pattern, lambda _: method, text))
 
@@ -76,7 +74,9 @@ def replace_method(path: Path, signature: str, body: str):
 def patch_tree(decoded: Path, version: str) -> list[dict]:
     smali = decoded / "smali_classes2"
     true_bool = "    const/4 v0, 0x1\n    return v0"
-    true_object = "    sget-object v0, Ljava/lang/Boolean;->TRUE:Ljava/lang/Boolean;\n    return-object v0"
+    true_object = (
+        "    sget-object v0, Ljava/lang/Boolean;->TRUE:Ljava/lang/Boolean;\n    return-object v0"
+    )
     patches = [
         (
             "com/crosspaste/app/d.smali",
@@ -219,11 +219,14 @@ def build(args):
         run("apktool", "d", "--output", decoded, merged)
         applied = patch_tree(decoded, args.version)
         unsigned = work / "unsigned.apk"
+        aapt = work / "aapt2"
+        shutil.copy2(Path(os.environ["ANDROID_HOME"]) / "build-tools/37.0.0/aapt2", aapt)
+        aapt.chmod(0o700)
         run(
             "apktool",
             "b",
             "--aapt",
-            Path(os.environ["ANDROID_HOME"]) / "build-tools/37.0.0/aapt2",
+            aapt,
             "--output",
             unsigned,
             decoded,
@@ -256,9 +259,7 @@ def build(args):
             text=True,
         ).stdout
         run("zipalign", "-c", "-P", "16", "4", artifact)
-        metadata = run(
-            "aapt2", "dump", "badging", artifact, capture_output=True, text=True
-        ).stdout
+        metadata = run("aapt2", "dump", "badging", artifact, capture_output=True, text=True).stdout
         if (
             f"name='{APP_ID}'" not in metadata
             or f"versionCode='{version_code(args.version)}'" not in metadata

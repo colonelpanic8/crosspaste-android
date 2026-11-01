@@ -22,9 +22,7 @@ def version_code(version: tuple[int, int, int]) -> int:
         raise ValueError(f"version {major}.{minor}.{patch} exceeds version-code fields")
     code = major * 1_000_000 + minor * 1_000 + patch
     if not 1 <= code <= 2_100_000_000:
-        raise ValueError(
-            f"version {major}.{minor}.{patch} has invalid Android code {code}"
-        )
+        raise ValueError(f"version {major}.{minor}.{patch} has invalid Android code {code}")
     return code
 
 

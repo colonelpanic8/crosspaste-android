@@ -54,8 +54,7 @@ def main() -> int:
     fingerprint_path = Path(sys.argv[1]) / "fingerprint.txt"
     fingerprint = fingerprint_path.read_text(encoding="utf-8").strip()
     formatted = " ".join(
-        fingerprint[index : index + 2].upper()
-        for index in range(0, len(fingerprint), 2)
+        fingerprint[index : index + 2].upper() for index in range(0, len(fingerprint), 2)
     )
     add_url = f"{repo_url}?fingerprint={fingerprint}"
     output = Path(sys.argv[2])

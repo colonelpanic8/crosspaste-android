@@ -19,9 +19,7 @@ def read_versions(repo_dir: Path, app_id: str) -> list[tuple[int, str]]:
         apk = APK(str(apk_path))
         package = apk.get_package()
         if package != app_id:
-            raise ValueError(
-                f"{apk_path.name} has package {package!r}, expected {app_id!r}"
-            )
+            raise ValueError(f"{apk_path.name} has package {package!r}, expected {app_id!r}")
         if "android.hardware.type.watch" in apk.get_features():
             raise ValueError(
                 f"{apk_path.name} is a watch APK; the phone repository accepts crosspaste-community.apk only"
@@ -69,10 +67,7 @@ def main() -> int:
         lines.extend((f"  - versionName: {name}", f"    versionCode: {code}"))
     with metadata_file.open("a", encoding="utf-8") as handle:
         handle.write("\n".join(lines) + "\n")
-    print(
-        "  recorded versions: "
-        + ", ".join(f"{name} ({code})" for code, name in versions)
-    )
+    print("  recorded versions: " + ", ".join(f"{name} ({code})" for code, name in versions))
     return 0
 
 
