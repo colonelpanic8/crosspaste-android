@@ -29,6 +29,8 @@ footer {{ margin-top: 3rem; opacity: .75; }}
 <h1>CrossPaste Community F-Droid Repository</h1>
 <p>This self-hosted repository serves the same signed CrossPaste Community APKs attached to GitHub releases.</p>
 <p><a class="cta" href="{add_url}">Add repository to F-Droid</a></p>
+<p><a class="cta" href="obtainium://add/https://github.com/colonelpanic8/crosspaste-android">Add app to Obtainium</a></p>
+<p><a href="https://github.com/colonelpanic8/crosspaste-android/releases/latest/download/crosspaste-community.apk">Download the latest signed APK</a></p>
 <p>Manual repository address:</p><pre>{repo_url}</pre>
 <p>Repository signing fingerprint (SHA-256):</p><pre>{fingerprint}</pre>
 <p>This is an CrossPaste Community-operated binary repository, not a listing in F-Droid's official catalog.</p>
@@ -56,7 +58,7 @@ def main() -> int:
     formatted = " ".join(
         fingerprint[index : index + 2].upper() for index in range(0, len(fingerprint), 2)
     )
-    add_url = f"{repo_url}?fingerprint={fingerprint}"
+    add_url = f"{repo_url.replace('https://', 'fdroidrepos://', 1)}?fingerprint={fingerprint}"
     output = Path(sys.argv[2])
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
