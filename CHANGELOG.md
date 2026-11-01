@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.2.0]
+
+- Keep the sync server running on VPN networks such as Tailscale, not only on Wi-Fi.
+
 ## [1.1.0]
 
 - Trust the declarative device fleet published in the dotfiles repository without PIN pairing.

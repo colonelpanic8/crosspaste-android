@@ -1,0 +1,1 @@
+* Keep the sync server running on VPN networks such as Tailscale, not only on Wi-Fi.

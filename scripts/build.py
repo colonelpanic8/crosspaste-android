@@ -205,6 +205,57 @@ def hook_application(decoded: Path) -> dict:
     return {"file": relative, "method": "public final onCreate()V", "purpose": "fleet trust"}
 
 
+def insert_after(path: Path, pattern: str, insertion: str, purpose: str):
+    text = path.read_text()
+    text, count = re.subn(pattern, lambda match: match.group(0) + insertion, text)
+    if count != 1:
+        raise ValueError(f"Expected one {purpose} site in {path.name}, got {count}")
+    path.write_text(text)
+
+
+def allow_vpn_networks(decoded: Path) -> list[dict]:
+    """Run the sync server on VPN networks such as Tailscale, not only Wi-Fi."""
+    foreground = decoded / "smali_classes2" / "com/crosspaste/foreground"
+    gap = r"(?:\n|    \.line \d+\n)*"
+    builder = "Landroid/net/NetworkRequest$Builder;"
+    insert_after(
+        foreground / "f.smali",
+        r"    const/4 v1, 0x1\n" + gap + rf"    invoke-virtual \{{v0, v1\}}, {re.escape(builder)}->"
+        rf"addTransportType\(I\){re.escape(builder)}\n" + gap + r"    move-result-object v0\n",
+        f"    const/4 v2, 0x4\n"
+        f"    invoke-virtual {{v0, v2}}, {builder}->addTransportType(I){builder}\n"
+        f"    move-result-object v0\n"
+        f"    const/16 v2, 0xf\n"
+        f"    invoke-virtual {{v0, v2}}, {builder}->removeCapability(I){builder}\n"
+        f"    move-result-object v0\n",
+        "network request",
+    )
+    insert_after(
+        foreground / "SyncServiceController$startServices$2.smali",
+        r"    invoke-virtual \{p1, v3\}, Landroid/net/NetworkCapabilities;->hasTransport\(I\)Z\n"
+        + gap
+        + r"    move-result v5\n",
+        "    if-nez v5, :fleet_transport_checked\n"
+        "    const/4 v5, 0x4\n"
+        "    invoke-virtual {p1, v5}, Landroid/net/NetworkCapabilities;->hasTransport(I)Z\n"
+        "    move-result v5\n"
+        "    :fleet_transport_checked\n",
+        "active network transport",
+    )
+    return [
+        {
+            "file": "com/crosspaste/foreground/f.smali",
+            "method": "public final c()V",
+            "purpose": "VPN sync",
+        },
+        {
+            "file": "com/crosspaste/foreground/SyncServiceController$startServices$2.smali",
+            "method": "public final invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;",
+            "purpose": "VPN sync",
+        },
+    ]
+
+
 def add_helper_dex(apk: Path, helper: Path) -> str:
     with ZipFile(apk) as archive:
         dex = sorted(name for name in archive.namelist() if re.fullmatch(r"classes\d*\.dex", name))
@@ -281,6 +332,7 @@ def patch_tree(decoded: Path, version: str, fleet: bytes) -> list[dict]:
         if changed != original:
             path.write_text(changed)
     applied.append(hook_application(decoded))
+    applied.extend(allow_vpn_networks(decoded))
     asset = decoded / "assets" / FLEET_ASSET
     if asset.exists():
         raise ValueError(f"Upstream already ships {asset.name}")
